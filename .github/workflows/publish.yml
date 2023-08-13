@@ -1,0 +1,32 @@
+name: Deploy to AWS Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set Up Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: oracle
+          java-version: 17
+
+      - name: Build with Maven
+        run: |
+          cd solver
+          mvn package
+
+      - name: Deploy to AWS Lambda
+        run: aws lambda update-function-code --function-name 8-queens-puzzle-solver --zip-file fileb://solver/target/solver-1.0.jar --region us-east-1
+
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
